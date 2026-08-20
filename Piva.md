@@ -1,50 +1,73 @@
-# BIOS
+## 1. O BIOS/UEFI (O "Gerente de Abertura")
 
-O BIOS/UEFI é o firmware de baixo nível gravado na placa-mãe. Sua função principal é preparar o hardware, testar componentes (POST) e inicializar o sistema operacional. O UEFI é a evolução moderna do BIOS, trazendo interface gráfica, suporte a mouse, mais segurança e discos rígidos gigantescos
+Pense no BIOS/UEFI como o gerente de uma loja que chega primeiro, acende as luzes e checa se todas as ferramentas estão funcionado antes de abrir as portas para os clientes.
 
-# Funções principais do BIOS/UEFI
+* **O que é:** Um firmware (código de baixo nível) gravado direto em um chip da placa-mãe.
+* **UEFI:** É a evolução moderna do BIOS antigo, trazendo interface gráfica, suporte a mouse, compatibilidade com discos maiores e mais segurança.
 
-POST: Ao ligar o pc, ele testa componentes essenciais como memória RAM, processador, placa de vídeo e armazenamento para se certificar que estão operando corretamente.
+### As 4 Funções Principais:
+1. **POST:** Assim que você liga o PC, ele testa se os componentes essenciais (RAM, Processador, Placa de Vídeo, Armazenamento) estão operando.
+2. **Configuração de Hardware:** Permite ajustar parâmetros físicos (frequências, voltagens/overclock, perfis XMP de memória).
+3. **Gerenciamento de Boot:** Identifica em qual disco (SSD/HD) ou pendrive está o sistema operacional e inicia o carregador de inicialização.
+4. **Secure Boot:** Camada de segurança do UEFI que impede a execução de softwares maliciosos durante a inicialização.
 
-Configuração de Hardware: Permite alterar parâmetros físicos antes do sistema operacional carregar, como frequências, voltagens (overclocking) e perfis de memória (XMP).
+---
 
-Gerenciamento de Boot: Identifica em qual disco (SSD/HD) ou pendrive está o sistema operacional e inicia o carregador de inicialização (boot loader).
+## 2. A Passagem de Bastão (Como a CPU e o BIOS Conversam)
 
-Segurança de Inicialização (Secure Boot): Exclusivo do UEFI, impede a execução de códigos não autorizados ou maliciosos durante o processo de boot.
+Este processo ocorre nos primeiros segundos após o botão de ligar ser pressionado:
 
-# Como o processador e o BIOS/UEFI se comunicam
+1. **Ponto de Partida (Endereço Fixo):** Ao receber energia, a CPU zera seus registradores e busca instruções em um endereço fixo pré-programado na placa-mãe.
+2. **Leitura Direta:** Como a memória RAM ainda não foi configurada, a CPU lê o código do BIOS/UEFI diretamente do chip usando seu relógio interno (*clock*).
+3. **Entrega de Controle:** Após testar e configurar o hardware, o BIOS/UEFI encontra o sistema operacional (Windows/Linux), carrega os arquivos essenciais na RAM e passa o comando para a CPU executar o SO.
 
-A conversa entre a CPU e o firmware não é igual à comunicação com um software comum no Windows, pois o sistema operacional ainda não foi carregado. Essa comunicação ocorre de forma muito estruturada:
+---
 
-. Ponto de partida (Endereço Fixo): quando o computador está energizado, a CPU zera seus registradores e busca intruções em um endereço de memória fixo e pré-programado
+## 3. O Processador e o Sistema Operacional
 
-. Leitura Direta: O processador começa a ler e executar as instruções passo a passo diretamente do chip do firmware. Como a memória RAM ainda não foi testada nem configurada, o processador lê esses dados com base em seu próprio relógio interno e nas velocidades padrão da placa-mãe
+### Como o Processador Funciona
+O processador opera essencialmente como uma calculadora de altíssima velocidade:
+* Processa dados em formato binário (`0` e `1`).
+* **Fluxo de Trabalho:** Busca dados na memória RAM $\rightarrow$ Armazena em um **Registrador** (memória interna ultra-rápida) $\rightarrow$ Executa a operação lógica/aritmética $\rightarrow$ Devolve o resultado para a RAM.
 
-# Comunicação via Barramento e Portas
+---
 
-Ao ligar o computador, o BIOS/UEFI verifica os principais componentes de hardware, como processador, RAM e placa de vídeo, usando os barramentos da placa-mãe. Se estiverem funcionando corretamente, o sistema continua a inicialização. A memória CMOS armazena configurações do BIOS/UEFI, como data, hora e algumas configurações de hardware.
+### Como o Sistema Operacional Assume o Controle
 
-# Entrega de Controle
+Para gerenciar múltiplos programas sem que um interfira no outro, a CPU trabalha com **Modos de Execução**:
 
-Depois de configurar o hardware, o BIOS/UEFI procura um dispositivo de armazenamento válido e encontra o *arquivo de inicialização do sistema operacional. Ele carrega esse arquivo na **memória RAM* e passa o controle do computador para o *sistema operacional*, que continua o processo de inicialização.
+| Modo | O que roda aqui? | Nível de Acesso |
+| :--- | :--- | :--- |
+| **Modo Usuário** | Aplicativos comuns (Navegador, Jogos, Word) | **Restrito:** Não pode acessar o hardware diretamente. |
+| **Modo Kernel** | Núcleo do Sistema Operacional | **Total:** Acesso irrestrito a todo o hardware. |
 
+#### Mecanismos de Transição e Multitarefa:
 
-# Processador
+* **Interrupção do Temporizador (*Timer Interrupt*):** Um chip envia um sinal elétrico periódico (ex: a cada 10ms) que obriga a CPU a pausar o programa atual e dar atenção ao Sistema Operacional.
+* **Chamadas de Sistema (*System Calls*):** Quando um app precisa de algo do hardware (ex: ler um arquivo), ele faz uma solicitação (*syscall*) que força a CPU a trocar para o Modo Kernel.
+* **Escalonador (*Scheduler*):** O SO salva o estado atual do programa na memória (**Bloco de Controle de Processo - PCB**), escolhe a próxima tarefa da fila e a carrega na CPU. Isso garante a ilusão de que vários programas rodam exatamente ao mesmo tempo.
 
-O processador opera como se fosse uma calculadora: ele recebe os dados por meio de um código binário — formado por 0 e 1 —, processa, armazena e distribui esse volume de informações tendo como base as instruções presentes na sua memória interna. Quanto mais sofisticado o processador for, mais funções conseguirá desempenhar e com maior velocidade.
+## Onde entram os drivers e gerenciadores de recursos
+ O papel dos drivers no Processador:
+ Os drivers são programas que contêm instruções específicas para a CPU conversar com os componentes de hadware(placa de video, disco, rede). Quando um programa precisa usar o hadware, a CPU executa o código do driver, após o driver traduz ordens gerais do sistema em comandos diretos que o chip do dispositivo entende.
 
-Seu funcionamento é complexo, mas pode ser descrito assim: o processador busca na Memória de Acesso Aleatório (RAM) os números, que são guardados em um registrador especial para operações aritméticas. Em seguida, procura mais um número presente na memória RAM e faz o mesmo caminho. Ambos os números são somados e processados, retornando para a memória RAM.
+O papel dos gerenciadores de Recursos:
+ O gerenciador de recursos(parte do núcleo ou kemel do sistema operacional) decide quando e quanto tempo cada processo fica na CPU. Ele utiliza um componente chamado escalanador(scheduler) para alternar rapidamente entre tarefas, dando a impressão de que tudo roda ao mesmo tempo. O gerenciador de memória configura a unidade de gerenciamento de memória(MMU) para definir quais dados vão para a memória física ou cache do processador.
 
-## O que acontece quando o sistema operacional asssume o controle do processador?
+ Como eles entram em ação
+ Modo Núcleo/ Kernel, é o nivel mais acessado ao hadware. Os drivers e o gerenciador de recursos do sistema operacional(como o escalonador de processos e o gerenciador de memória) rodam nesse modo. Eles dão ordens diretas aos circuitos do computador. Já no modo usuário é onde rodam seus aplicativos padrões como o próprio navegador, jogos, editor de texto. Eles não tem acesso direto ao hadware e precisam pedir licença aos drivers e ao sistema.
 
-O sistema operacional (SO) assume o controle do processador através de interrupções e do mecanismo de mudança de modo de execução (Modo Usuário para Modo Kernel). Esse processo é o que permite a um SO multitarefa "pausar" um programa e dar vez a outro de forma imperceptível.
+ ## Função do driver e Gerenciador de recursos
+ Gerenciador de recursos: Funcionam como uma "chefia", onde se comunicam com o processador quais tarefas executar em cada núcleo, quanto tempo cada aplicativo pode usar o processador e com a memória RAM deve ser dividida.
 
-Para entender o melhor o funcionamento das transições, é essencial observar os seguintes mecanismos:
+ Drivers: Funcioanam como um locutor ou seja se um programa quer impremir um documento, ele avisa o sistema operacional. O driver de impressão traduz esse pedido em instruções binárias e utiliza o processador para enviar os comandos de sinal elétrico corretos para a impressora.
 
-. Modos de Execução da CPU: O processador opera em dois níveis de privilégio: o Modo Usuário (onde rodam os aplicativos, com acesso restrito ao hardware) e o Modo Kernel/Sistema (onde o SO tem controle total e acesso irrestrito).
+## Papel dos barramentos e dispositivos de E/S nesse processo
+ Barramentos: De forma geral os barramentos são responsáveis pela interligação e comunicação dos dispositivos em um computador. Note que, para o processador se comunicar com a memória e o conjunto de dispositivos de entrada e saída, há três setas, isto é, barramento: Um sendo chamado barramento de endereçoes, barramento de dados e barramento de controle. Como o nome deixa claro, é pelo barramento de dados que as informações trafegam. Por sua vez, o barramento de controle faz a sincronização das referidas atividades, habilitando ou desabilitando o fluxo de dados, por exemplo. Imagine que o processador necessita de um dado presente na memória. Pelo barramento de endereços(indica onde os dados processados devem ser retirados ou para onde são enviados), a CPU obtém a localização deste dado dentro da memória. Como precisa apenas acessar o dado, o processador indica pelo barramento de controle que esta é uma operação de leitura. O dado então  é  localizado e inserido no barramento de dados, por onde o processador finalmente, o lê.
 
-. Interrupção do Temporizador (Timer Interrupt): Um chip de hardware externo envia sinais elétricos em intervalos regulares (ex: a cada 10 milissegundos). Quando a CPU recebe esse sinal, ela suspende o programa atual e transfere o controle para o kernel do SO
-
-. Chamadas de Sistema (System Calls): Quando um aplicativo precisa ler um arquivo ou acessar a internet, ele gera uma "interrupção de software" (instrução syscall). Isso força a CPU a chavear para o Modo Kernel, transferindo o controle para o sistema operacional processar a requisição.
-
-. Escalonamento (Scheduler): Uma vez que o controle está com o kernel, o sistema operacional salva o estado do programa anterior na memória (Bloco de Controle de Processo - PCB), escolhe a próxima tarefa na fila e a carrega para execução na CPUs
+ Dispositivos de E/S
+ Entrada de dados: Facilita a recepção de dados vindo de dispositivos externos. Isso inclui teclado, mause sensores ou qualquer outro dispositivo de entrada.
+ 
+ Saída de dados: Possibilita a transmissão de dados processados para dispositivos externos como monitores, impressoras denytre outros dispositivos de saida.
+ 
+ A E/S coordena o controle e a comunição com dispositivos periféricos, garantindo que os dados sejam transferidos corretamente entre o computador e esses dispositivos. Ela se utiliza de interfaces específicas para se interagir com diferentes tipos de dispositivos. Por exemplo: dispositivos de armazenamento podem se comunicar através de interfaces como SATA  ou USB, enquanto alguns utilizam Ethernet ou WI-FI. Para lidar com a comunicação não simultânea entre o processador e os dispositivos externos , a E/S muitas vezes faz um uso de mecanismo de interrupção, permitindo com que os dispositivos externos notifiquem o processador sobre eventos significativos, como a conclusão de uma operação de leitura ou gravação. Ela pode envolver controladores específicos para gerenciar diferentes categorias de dispositivos. Esses controladores traduzem comandos para a  CPU em operações compreensíveis para os dispositivos, ajustando a comunicação. 
