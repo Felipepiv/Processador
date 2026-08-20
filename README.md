@@ -1,5 +1,7 @@
 ## 1. O BIOS/UEFI (O "Gerente de Abertura")
 
+![diagramaBIOS](FLUXOGRAMA-BIOS.PNG)
+
 Pense no BIOS/UEFI como o gerente de uma loja que chega primeiro, acende as luzes e checa se todas as ferramentas estão funcionado antes de abrir as portas para os clientes.
 
 O que é: Um firmware (código de baixo nível) gravado direto em um chip da placa-mãe.
@@ -29,6 +31,31 @@ Este processo ocorre nos primeiros segundos após o botão de ligar ser pression
 O processador opera essencialmente como uma calculadora de altíssima velocidade:
 * Processa dados em formato binário (`0` e `1`).
 Fluxo de Trabalho: Busca dados na memória RAM  Armazena em um **Registrador** (memória interna ultra-rápida) $\rightarrow$ Executa a operação lógica/aritmética  Devolve o resultado para a RAM.
+
+![diagramaPROCESSADOR](Diagrama-processador.png)
+
+### Registradores de Endereço e Controle (Laranja/Cinza)
+1. PC (Program Counter / Contador de Programa): Armazena o endereço da memória onde está a próxima instrução a ser executada. A cada instrução lida, ele é incrementado automaticamente.
+2. SP (Stack Pointer / Ponteiro de Pilha): Aponta para o topo da memória RAM dedicada à pilha (stack), usada para salvar endereços de retorno em chamadas de sub-rotinas/funções ou salvar dados temporários.
+3. MUX (Multiplexador): Funciona como uma "chave seletora". Ele escolhe de onde virá o endereço que será enviado para a memória em um dado momento: do PC (para buscar a próxima instrução), do SP (para operações de pilha) ou do barramento interno de dados (para acesso a variáveis em memória).
+4. REM (Registrador de Endereço de Memória / MAR): Guarda temporariamente o endereço de 16 bits que a CPU precisa acessar na memória principal (permitindo endereçar até $2^{16} = 64\text{ Kbytes}$).
+
+### Registradores de Dados e Processamento (Azul)
+
+1. RDM (Registrador de Dados da Memória / MDR): Funciona como a "porta de entrada e saída" de dados entre a CPU e a memória. Ele armazena temporariamente a informação de 8 bits que está sendo lida da memória ou gravada nela.
+2. RI (Registrador de Instrução): Armazena o código de operação (Opcode) da instrução atual que acabou de ser lida da memória para que ela possa ser decodificada.
+3. Acumulador (ACC): É o registrador principal de trabalho da CPU. Ele fornece um dos operandos para as operações de cálculo e também recebe e armazena o resultado gerado pela Unidade Aritmética e Lógica.
+4. Unidade Aritmética e Lógica (UAL / ALU): O "cérebro matemático" da CPU. Realiza operações aritméticas (soma, subtração) e lógicas (AND, OR, NOT) entre o dado do Acumulador e um dado do barramento.
+5. N, Z, C (Registrador de Flags / Estado): Guardam o status do resultado da última operação feita pela UAL:
+N (Negative): Ativado ($1$) se o resultado for negativo.
+Z (Zero): Ativado ($1$) se o resultado for exatamente zero.
+C (Carry): Ativado ($1$) se houve "vai-um" ou "vêm-um" (transbordo aritmético).
+
+### Unidade de Decisão e Controle (Verde)
+1. Unidade de Controle (UC): É o maestro do computador. Ela lê a instrução que está no RI, verifica as flags de estado (N, Z, C) e gera os sinais de controle elétricos que ativam ou desativam todos os outros componentes (indicando se a memória deve ler/escrever, se a UAL deve somar/subtrair, etc.).
+
+### Componente Externo (Amarelo)
+1. Memória (64 Kbytes): A memória principal externa ao bloco do processador. Onde ficam guardados tanto o programa (código) quanto as variáveis (dados), trafegando dados em palavras de 8 bits através dos endereços de 16 bits.
 
 ---
 
